@@ -1,5 +1,5 @@
-const userModel = require("../models/userModels");
-const bcrypt = require("bcryptjs");
+const userModel = require("../models/UserModel");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 //register callback
@@ -40,7 +40,7 @@ const loginController = async (req, res) => {
     if (!isMatch) {
       return res
         .status(200)
-        .send({ message: "Invlid EMail or Password", success: false });
+        .send({ message: "Invlid Email or Password", success: false });
     }
     const token = jwt.sign({ id: user.__id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
