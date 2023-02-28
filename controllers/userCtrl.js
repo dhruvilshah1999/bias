@@ -58,20 +58,20 @@ const loginController = async (req, res) => {
 // Authentication 
 const authController = async (req, res) => {
   try {
-    const user = await userModel.findById({ _id: req.body.userId })
-    user.password = undefined;
-    console.log("user is found", user);
-    if (!user) {
-      return res.status(200).send({
-        message: 'User not Found',
-        success: false
-      });
-    } else {
-      res.status(200).send({
-        success: true,
-        data: user
-      });
-    }
+    // const user = await userModel.findById({ _id: req.body.userId })
+    // user.password = undefined;
+    // console.log("user is found", user);
+    // if (!user) {
+    //   return res.status(200).send({
+    //     message: 'User not Found',
+    //     success: false
+    //   });
+    // } else {
+    //   res.status(200).send({
+    //     success: true,
+    //     data: user
+    //   });
+    // }
   } catch (err) {
     console.log(err);
     res.status(500).send({
