@@ -42,9 +42,10 @@ const loginController = async (req, res) => {
         .status(200)
         .send({ message: "Invlid Email or Password", success: false });
     }
-    const token = jwt.sign({ id: user.__id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
+    console.log("Login UserCtrl Page Token",token);
     res.status(200).send({ message: "Login Success", success: true, token });
   } catch (error) {
     console.log(error);
@@ -52,4 +53,30 @@ const loginController = async (req, res) => {
   }
 };
 
-module.exports = { loginController, registerController };
+const authController = async(req, res) => {
+  try{
+    const user = await userModel.findById({_id: req.body.userId})
+    user.password = undefined;
+    console.log("user is found", user);
+    if(!user){
+      return res.status(200).send({
+        message:'User not Found',
+        success:false
+      });
+    }else{
+      res.status(200).send({
+        success: true,
+        data : user
+      }); 
+    }
+  }catch(err){
+    console.log(err);
+    res.status(500).send({
+      message:'auth failed',
+      success:false,
+      err
+    });
+  }
+};
+
+module.exports = { loginController, registerController, authController };
