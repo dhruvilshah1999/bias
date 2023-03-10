@@ -33,13 +33,13 @@ const employeeSchema = new mongoose.Schema(
       type: String,
       required: [true, "experience is required"],
     },
-    ratePerHour: {
+    salaryPerHour: {
       type: Number,
       required: [true, "fee is required"],
     },
     status: {
       type: String,
-      default: true,
+      default: 'valid',
     },
     timings: {
       type: Object,
@@ -49,5 +49,5 @@ const employeeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const EmployeeModel = mongoose.model("doctors", employeeSchema);
+const EmployeeModel = mongoose.model("employee", employeeSchema);
 module.exports = EmployeeModel;

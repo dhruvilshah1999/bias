@@ -1,6 +1,8 @@
 const userModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const employeeModel = require("../models/EmployeeModel");
+const AppointmentModel = require("../models/AppointmentModel")
 
 //register callback
 const registerController = async (req, res) => {
@@ -45,7 +47,7 @@ const loginController = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
-    console.log("Login UserCtrl Page Token",token);
+    console.log("Login UserCtrl Page Token", token);
     res.status(200).send({ message: "Login Success", success: true, token });
   } catch (error) {
     console.log(error);
@@ -53,30 +55,149 @@ const loginController = async (req, res) => {
   }
 };
 
-const authController = async(req, res) => {
-  try{
-    const user = await userModel.findById({_id: req.body.userId})
+// Authentication 
+const authController = async (req, res) => {
+  try {
+    const user = await userModel.findById({ _id: req.body.userId })
     user.password = undefined;
     console.log("user is found", user);
-    if(!user){
+    if (!user) {
       return res.status(200).send({
-        message:'User not Found',
-        success:false
+        message: 'User not Found',
+        success: false
       });
-    }else{
+    } else {
       res.status(200).send({
         success: true,
-        data : user
-      }); 
+        data: user
+      });
     }
-  }catch(err){
+  } catch (err) {
     console.log(err);
     res.status(500).send({
-      message:'auth failed',
-      success:false,
+      message: 'auth failed',
+      success: false,
       err
     });
   }
 };
 
-module.exports = { loginController, registerController, authController };
+// Adding a new employee
+const createEmployeeController = async (req, res) => {
+  try {
+    const newEmployee = await employeeModel({ ...req.body, status: 'valid' });
+    await newEmployee.save();
+    // const adminUser = await userModel.findOne({ isAdmin: true });
+    // const notifcation = adminUser.notifcation;
+    // notifcation.push({
+    //   type: "apply-doctor-request",
+    //   message: `${newDoctor.firstName} ${newDoctor.lastName} Has Applied For A Doctor Account`,
+    //   data: {
+    //     doctorId: newDoctor._id,
+    //     name: newDoctor.firstName + " " + newDoctor.lastName,
+    //     onClickPath: "/admin/employees",
+    //   },
+    // });
+    // await userModel.findByIdAndUpdate(adminUser._id, { notifcation });
+    res.status(201).send({
+      success: true,
+      message: "Employee Added Successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Error While Creating a Employee",
+    });
+  }
+};
+
+// Adding a new Appointment
+const createAppointmentController = async (req, res) => {
+  try {
+    const newAppointment = await AppointmentModel({ ...req.body, status: 'valid' });
+    await newAppointment.save();
+    const adminUser = await userModel.findOne({ isAdmin: true });
+    const notifcation = adminUser.notifcation;
+    notifcation.push({
+      type: "appointment-creation",
+      message: `${newAppointment.firstName} ${newAppointment.lastName} Appointment is Booked Successfully with ${newAppointment.empFirstName} ${newAppointment.empLastName}`,
+      data: {
+        appointmentId: newAppointment._id,
+        userName: newAppointment.firstName + " " + newAppointment.lastName,
+        employeeName: newAppointment.empFirstName + " " + newAppointment.empLastName,
+        onClickPath: "/admin/appointments",
+      },
+    });
+    await userModel.findByIdAndUpdate(adminUser._id, { notifcation });
+    res.status(201).send({
+      success: true,
+      message: "Appointment Added Successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Error While Creating a Appointment",
+    });
+  }
+};
+
+// Get all Notification
+const getAllNotificationController = async (req, res) => {
+  try {
+    const user = await userModel.findOne({ _id: req.body.userId });
+    const seennotification = user.seennotification;
+    const notifcation = user.notifcation;
+    seennotification.push(...notifcation);
+    user.notifcation = [];
+    user.seennotification = notifcation;
+    const updatedUser = await user.save();
+    res.status(200).send({
+      success: true,
+      message: "all notification marked as read",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error in notification",
+      success: false,
+      error,
+    });
+  }
+}
+
+// Delete all Notification
+const deleteAllNotificationController = async (req, res) => {
+  try {
+    const user = await userModel.findOne({ _id: req.body.userId });
+    user.notifcation = [];
+    user.seennotification = [];
+    const updatedUser = await user.save();
+    updatedUser.password = undefined;
+    res.status(200).send({
+      success: true,
+      message: "Notifications Deleted successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "unable to delete all notifications",
+      error,
+    });
+  }
+}
+module.exports = {
+  loginController,
+  registerController,
+  authController,
+  createEmployeeController,
+  createAppointmentController,
+  getAllNotificationController,
+  deleteAllNotificationController
+};
