@@ -8,6 +8,7 @@ const {
   getAllNotificationController,
   deleteAllNotificationController
 } = require("../controllers/userCtrl");
+
 const authMiddleware = require("../middleware/authMiddleware");
 
 //router onject
