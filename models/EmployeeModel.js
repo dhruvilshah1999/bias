@@ -21,6 +21,10 @@ const employeeSchema = new mongoose.Schema(
       type: String,
       required: [true, "email is required"],
     },
+    password: {
+      type: String,
+      required: [true, "password is require"],
+    },
     address: {
       type: String,
       required: [true, "address is required"],
@@ -40,6 +44,10 @@ const employeeSchema = new mongoose.Schema(
     status: {
       type: String,
       default: 'valid',
+    },
+    isEmployee: {
+      type: Boolean,
+      default: true,
     },
     timings: {
       type: Object,
